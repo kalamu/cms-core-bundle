@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+    <channel>
+        <title>{{label}}</title>
+        <descripion>Derniers {{label}}</descripion>
+        <lastBuildDate>{{'now'|date('D, d M y H:i:s O')}}</lastBuildDate>
+        <link>{{manager.getPublicIndexlink({}, true)}}</link>
+        {%- for content in contents -%}
+        <item>
+            <title>{{content.title}}</title>
+            {%- if content.resume is defined -%}
+            <description>{{content.resume}}</description>
+            {%- endif -%}
+            {%- if content.publishedAt is defined -%}
+            <pubDate>{{content.publishedAt|date('D, d M y H:i:s O')}}</pubDate>
+            {%- endif -%}
+            <link>{{manager.getPublicReadLink(content, {}, true)}}</link>
+        </item>
+        {%- endfor -%}
+    </channel>
+</rss>

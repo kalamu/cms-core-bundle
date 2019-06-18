@@ -1,0 +1,95 @@
+{% extends base_template %}
+
+{% form_theme form with ['RohoCoreBundle:Form:fields.html.twig', 'RohoExtraFormBundle:Form:fields.html.twig'] %}
+
+{% block configurator %}
+    
+    <h1 class="mn mb15"><i class="fa fa-angle-double-right"></i> Configuration des métadonnées</h1>
+    
+    <div class="panel panel-border panel-info top">
+        <div class="panel-body">
+            <p>Configuration des métadonnées pour les types de contenu le supportant.</p>
+            
+            <h3>{{title|raw}}</h3>
+            {{form_start(form)}}
+            
+            <div class="col-md-12">
+                {{form_errors(form.groups)}}
+                {{form_widget(form.groups)}}
+            </div>
+            <a href="#" id="add_group" class="btn btn-info"><i class="fa fa-plus"></i> Ajouter un groupe de données</a>
+            
+            
+            {{form_rest(form)}}
+            {{form_end(form)}}
+            
+        </div>
+    </div>
+    
+{% endblock %}
+
+{% block foot_script %}
+    {{parent()}}
+    
+    <script type="text/javascript">
+    $(function(){
+        var iterator_group = {{form.groups|length}};
+        
+        var handleRemove = function(btn){
+            btn.text('Supprimer').toggleClass('btn-warning btn-default ');
+            btn.click(function(e){
+                e.preventDefault();
+                
+                if( confirm("Êtes vous sûr de vouloir supprimer cet élément ?") ){
+                    $(this).parents('.collection-item').eq(0).remove();
+                }
+            });
+        };
+        
+        var handleMetas = function(btn){
+            btn.text("Ajouter un champ").toggleClass('btn-info btn-default m15');
+            btn.click(function(e){
+                e.preventDefault();
+                
+                iterator = $(this).attr('data-iterator') ? $(this).attr('data-iterator') : 0;
+                
+                html = $( btn.attr('data-collection-add-btn') ).attr('data-prototype');
+                ui = $( html.replace( /__name_group__/g, iterator ) );
+                $(this).attr('data-iterator', iterator+1);
+                $( btn.attr('data-collection-add-btn') ).find('>div').append(ui);
+                
+                ui.find('>.control-label').remove();
+                handleRemove( ui.find('a[data-collection-remove-btn]') );
+            });
+        };
+        
+        $('#add_group').click(function(e){
+            e.preventDefault();
+            
+            html_proto = $('#collection{{form.groups.vars.id}}_form_group').attr('data-prototype');
+            ui = $( html_proto.replace( /__name__/g, iterator_group++ ) );
+            $('#collection{{form.groups.vars.id}}_form_group>div').append( ui );
+            
+            ui.find('>.control-label').remove();
+            ui.find('a[data-collection-add-btn]').parent().toggleClass('col-sm-9 col-sm-12 text-left').next().toggleClass('col-sm-9 col-sm-12');
+            handleMetas( ui.find('a[data-collection-add-btn]') );
+            handleRemove( ui.find('a[data-collection-remove-btn]') );
+        });
+        
+        
+        $('.collection-item>.control-label').remove();
+        $('a[data-collection-add-btn]').parent().toggleClass('col-sm-9 col-sm-12 text-left').next().toggleClass('col-sm-9 col-sm-12');
+        handleMetas( $('a[data-collection-add-btn]') );
+        handleRemove( $('a[data-collection-remove-btn]') );
+    });  
+    </script>
+    <style type="text/css">
+        .collection-item{
+            border: 1px solid #ddd;
+            margin-bottom: 15px;
+            overflow: hidden;
+            padding: 15px 5px;
+            background: #fafafa;
+        }
+    </style>
+{% endblock %}

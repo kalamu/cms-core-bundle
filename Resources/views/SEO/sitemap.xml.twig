@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    {% for manager in master_manager.getTypesManagers %}
+        {% if manager.hasIndex %}
+        <url>
+            <loc>{{manager.getPublicIndexLink({}, true)}}</loc>
+            <priority>0.8</priority>
+        </url>
+        {% endif %}
+        {% if manager.hasRss %}
+        <url>
+            <loc>{{manager.getPublicRssLink({}, true)}}</loc>
+            <priority>0.5</priority>
+        </url>
+        {% endif %}
+        {% for content in manager.basePublicQuery.query.result %}
+        <url>
+            <loc>{{manager.getPublicReadLink(content, {}, true)}}</loc>
+            <priority>0.7</priority>
+            {% if content.updatedAt is defined %}<lastmod>{{content.updatedAt|date('Y-m-d')}}</lastmod>{% endif %}
+        </url>
+        {% endfor %}
+    {% endfor %}
+</urlset> 
+
+
+

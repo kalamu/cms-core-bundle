@@ -1,0 +1,29 @@
+
+services:
+
+    ## Service de référencement des routes
+    kalamu_cms_core.router:
+        class: Kalamu\CmsCoreBundle\Router\CmsRoutingLoader
+        arguments: ['@kalamu_cms_core.content_type.manager']
+        tags:
+            - { name: routing.loader }
+
+
+    kalamu_cms_core.base_content.form:
+        abstract: true
+        calls:
+            - [setContentTypeManager, ['@kalamu_cms_core.content_type.manager']]
+            - [setDynamiqueConfig, ['@kalamu_dynamique_config']]
+
+    kalamu_cms_core.elasticsearch.subscriber:
+        class: Kalamu\CmsCoreBundle\EventSubscriber\ElasticSearchListener
+        arguments: ['@kalamu_cms_core.content_type.manager', '@templating', '@request_stack']
+        tags:
+            - { name: kernel.event_subscriber }
+
+    kalamu.twig_extension:
+        class: Kalamu\CmsCoreBundle\Twig\KalamuExtension
+        arguments: ['@service_container']
+        public: false
+        tags:
+            - { name: twig.extension }

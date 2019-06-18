@@ -1,0 +1,32 @@
+{% extends base_template %}
+
+{% form_theme form with ['RohoCoreBundle:Form:fields.html.twig', 'RohoExtraFormBundle:Form:fields.html.twig'] %}
+
+{% block configurator %}
+    <h1 class="mn mb15"><i class="fa fa-angle-double-right"></i> Configuration des métadonnées</h1>
+    
+    <div class="panel panel-border panel-info top">
+        <div class="panel-body">
+            <p>Configuration des métadonnées pour les types de contenu le supportant.</p>
+            
+            {{form(form)}}
+        </div>
+    </div>
+{% endblock %}
+
+{% block foot_script %}
+    {{parent()}}
+    
+    <script type="text/javascript">
+    $(function(){
+        $('#{{form.entity.vars.id}}').change(function(){
+            if($(this).val() === 'term'){
+                $('#{{form.taxonomy.vars.id}}').parents('.form-group').show();
+            }else{
+                $('#{{form.taxonomy.vars.id}}').parents('.form-group').hide();
+            }
+        }).trigger('change');
+    });
+    </script>
+    
+{% endblock %}

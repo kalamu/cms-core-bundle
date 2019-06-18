@@ -1,0 +1,32 @@
+parameters:
+
+    kalamu_cms_core.content_type.default_manager.class: Kalamu\CmsCoreBundle\Manager\ContentManager
+    kalamu_cms_core.content_type.term.class: Kalamu\CmsCoreBundle\Manager\TermContentManager
+
+
+services:
+
+    # Abstract service for content managers
+    kalamu_cms_core.base_content.manager:
+        abstract: true
+        calls:
+            - [setDoctrine, ['@doctrine']]
+            - [setRouter, ['@router']]
+
+    # Manager for types
+    kalamu_cms_core.content_type.manager:
+        class: Kalamu\CmsCoreBundle\Manager\ContentTypeManager
+
+    # Manager for contexts
+    kalamu_cms_core.manager.context:
+        class: Kalamu\CmsCoreBundle\Manager\ContextManager
+
+    # Manager for dashboard
+    kalamu_cms_core.dashboard.manager.cms:
+        class: Kalamu\CmsCoreBundle\Manager\DashboardCmsManager
+        arguments: ['@doctrine', '@kalamu_cms_core.content_type.manager']
+
+    # Manager for links
+    kalamu_cms_core.link_manager:
+        class: Kalamu\CmsCoreBundle\Manager\LinkManager
+        arguments: ['@kalamu_cms_core.content_type.manager']

@@ -1,0 +1,19 @@
+{% set datas = entity.contenu|json_decode %}
+{% if datas %}
+
+    {% for row in datas.rows %}
+        <div class="row">
+            {% for col in row.cols %}
+            <div class="col-md-{{col.md}}">
+                {% for widget in col.widgets %}
+                    {{render_dashboard_element('cms', widget.type, widget.identifier, widget.params)}}
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+
+
+{% else %}
+    {{content.contenu|nl2br}}
+{% endif %}
