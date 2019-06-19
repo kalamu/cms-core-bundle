@@ -22,7 +22,7 @@ use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
  *
  * To learn more see {@link http://symfony.com/doc/current/cookbook/bundles/extension.html}
  */
-class RohoCmsExtension extends Extension implements PrependExtensionInterface
+class KalamuCmsCoreExtension extends Extension implements PrependExtensionInterface
 {
     /**
      * {@inheritDoc}

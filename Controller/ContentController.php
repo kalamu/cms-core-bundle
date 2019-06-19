@@ -34,7 +34,7 @@ class ContentController extends Controller
             throw $this->createNotFoundException("The home page has not yet been defined in configuration interface.");
         }
 
-        $manager = $this->get('roho_cms.content_type.manager')->getType($homepage['type']);
+        $manager = $this->get('kalamu_cms_core.content_type.manager')->getType($homepage['type']);
         if(isset($homepage['identifier']) && $homepage['identifier']){
 
             return $this->forward($manager->getControllerRead($homepage['context']), array(
@@ -54,7 +54,7 @@ class ContentController extends Controller
     }
 
     public function readAction(Request $Request, $type, $identifier, $context = null){
-        $manager = $this->get('roho_cms.content_type.manager')->getType($type);
+        $manager = $this->get('kalamu_cms_core.content_type.manager')->getType($type);
         $content = $manager->getPublicContent($identifier, $context);
         if(!$content){
             if($Request->attributes->getBoolean('is_home', false)){
@@ -80,7 +80,7 @@ class ContentController extends Controller
                 return $this->redirectToRoute($e->getPrevious()->getRoute(), $e->getPrevious()->getParameters());
             }elseif($e->getPrevious() instanceof RedirectCmsLinkException){
                 $exception = $e->getPrevious();
-                $url = $this->get('roho_cms.link_manager')->generateUrl($exception->getCmsLink(), $exception->getParameters(), $exception->getReferenceType());
+                $url = $this->get('kalamu_cms_core.link_manager')->generateUrl($exception->getCmsLink(), $exception->getParameters(), $exception->getReferenceType());
                 return $this->redirect($url);
             }else{
                 throw $e;
@@ -89,7 +89,7 @@ class ContentController extends Controller
     }
 
     public function readTermAction(Request $Request, $identifier){
-        $master_manager = $this->get('roho_cms.content_type.manager');
+        $master_manager = $this->get('kalamu_cms_core.content_type.manager');
         $manager = $master_manager->getType('term');
         $term = $manager->getPublicContent($identifier);
         $page = $Request->query->getInt('page', 1);
@@ -121,7 +121,7 @@ class ContentController extends Controller
     }
 
     public function indexAction(Request $Request, $type, $context = null){
-        $manager = $this->get('roho_cms.content_type.manager')->getType($type);
+        $manager = $this->get('kalamu_cms_core.content_type.manager')->getType($type);
         $page = $Request->query->getInt('page', 1);
 
         $queryBuilder = $manager->getQueryBuilderForIndex($Request, $context);
@@ -134,21 +134,21 @@ class ContentController extends Controller
     }
 
     public function rssAction(Request $Request, $type, $context = null){
-        $manager = $this->get('roho_cms.content_type.manager')->getType($type);
+        $manager = $this->get('kalamu_cms_core.content_type.manager')->getType($type);
 
         $contents = $manager->getQueryBuilderForIndex($Request, $context)->setMaxResults(100)->getQuery()->getResult();
 
         $response = new Response();
         $response->headers->set('Content-Type', 'application/rss+xml; charset=UTF-8');
-        return $this->render('RohoCmsBundle:SEO:rss.xml.twig', array('contents' => $contents, 'manager' => $manager, 'label' => $manager->getLabel()), $response);
+        return $this->render('KalamuCmsCoreBundle:SEO:rss.xml.twig', array('contents' => $contents, 'manager' => $manager, 'label' => $manager->getLabel()), $response);
     }
 
     public function sitemapAction(){
-        $master_manager = $this->get('roho_cms.content_type.manager');
+        $master_manager = $this->get('kalamu_cms_core.content_type.manager');
 
         $response = new Response();
         $response->headers->set('Content-Type', 'application/xml; charset=UTF-8');
-        return $this->render('RohoCmsBundle:SEO:sitemap.xml.twig', array('master_manager' => $master_manager), $response);
+        return $this->render('KalamuCmsCoreBundle:SEO:sitemap.xml.twig', array('master_manager' => $master_manager), $response);
     }
 
     public function robotsAction(){
@@ -156,7 +156,7 @@ class ContentController extends Controller
 
         $response = new Response();
         $response->headers->set('Content-Type', 'text/plain; charset=UTF-8');
-        return $this->render('RohoCmsBundle:SEO:robots.txt.twig', array('allow' => $allow), $response);
+        return $this->render('KalamuCmsCoreBundle:SEO:robots.txt.twig', array('allow' => $allow), $response);
     }
 
     /**
@@ -169,9 +169,9 @@ class ContentController extends Controller
             return $this->redirectToRoute('cms_homepage');
         }
 
-        if($Request->query->has('type') && $this->get('roho_cms.content_type.manager')->hasType($Request->query->get('type'))){
+        if($Request->query->has('type') && $this->get('kalamu_cms_core.content_type.manager')->hasType($Request->query->get('type'))){
             $content_type = $Request->query->get('type');
-            $manager = $this->get('roho_cms.content_type.manager')->getType($content_type);
+            $manager = $this->get('kalamu_cms_core.content_type.manager')->getType($content_type);
         }else{
             $content_type = null;
         }
@@ -187,7 +187,7 @@ class ContentController extends Controller
         try{
             $paginator = $this->get('knp_paginator')->paginate($results,
                 $Request->query->getInt('page', 1),
-                ($content_type ? $manager->resultsPerPage() : $this->getParameter('roho_cms.results_per_page')));
+                ($content_type ? $manager->resultsPerPage() : $this->getParameter('kalamu_cms_core.results_per_page')));
         }catch(HttpException $e){
             if($this->getParameter('kernel.debug')){
                 throw $e;
@@ -196,7 +196,7 @@ class ContentController extends Controller
             }
         }
 
-        return $this->render($content_type ? $manager->getTemplateSearch() : $this->getParameter('roho_cms.template_search'), array(
+        return $this->render($content_type ? $manager->getTemplateSearch() : $this->getParameter('kalamu_cms_core.template_search'), array(
             'paginator'     => $paginator,
             'q'             => $Request->query->get('q')
         ));

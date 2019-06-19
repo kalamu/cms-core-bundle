@@ -83,7 +83,7 @@ class ElasticSearchListener implements EventSubscriberInterface
                 $this->request_stack->push(Request::create('/'));
             }
 
-            $content = $this->templating->render('RohoCmsBundle:Content:_content.html.twig', array('entity' => $object));
+            $content = $this->templating->render('KalamuCmsCoreBundle:Content:_content.html.twig', array('entity' => $object));
             $document->set('contenu', strip_tags($content));
         }
 
