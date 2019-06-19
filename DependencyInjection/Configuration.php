@@ -30,9 +30,6 @@ class Configuration implements ConfigurationInterface
         $rootNode = $treeBuilder->root('kalamu_cms_core');
 
         $rootNode->children()
-                    ->scalarNode('home_route')
-                        ->info("Name for the homepage route")
-                    ->end()
                     ->arrayNode('menus')
                         ->prototype('scalar')->end()
                     ->end()

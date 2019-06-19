@@ -32,10 +32,6 @@ class KalamuCmsCoreExtension extends Extension implements PrependExtensionInterf
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
 
-        if(isset($config['home_route'])){
-            $container->setParameter('kalamu_cms_core.home_route', $config['home_route']);
-        }
-
         $container->setParameter('kalamu_cms_core.menus', $config['menus']);
         $container->setParameter('kalamu_cms_core.template_search', $config['template_search']);
         $container->setParameter('kalamu_cms_core.results_per_page', $config['results_per_page']);
