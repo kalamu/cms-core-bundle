@@ -39,18 +39,18 @@ class ContentTypeCompilerPass implements CompilerPassInterface
      */
     protected function registerContextManager(ContainerBuilder $container){
 
-        // Injection du manager de context dans les managers de contenu
+        // Inject the context manager in the content manager
         $baseContentManager = $container->findDefinition('kalamu_cms_core.base_content.manager');
         $baseContentManager->addMethodCall('setContextManager', array(new Reference('kalamu_cms_core.manager.context')));
 
-        // Ecoute des request par le manager de context
+        // Make the context manager listen the requests
         $manager = $container->findDefinition('kalamu_cms_core.manager.context');
         $manager->addTag('kernel.event_listener', array(
             'event'     => 'kernel.request',
             'method'    => 'onKernelRequest'
         ));
 
-        // Injection de la configuration des contexts dans le manager
+        // Inject the context configuration in the manager
         $manager->addMethodCall('setDefaultContext', array(new Parameter('kalamu_cms_core.default_context')));
         $manager->addMethodCall('setDefaultContextInclusive', array(new Parameter('kalamu_cms_core.default_context_inclusive')));
         foreach($container->getParameter('kalamu_cms_core.contexts') as $name => $config){

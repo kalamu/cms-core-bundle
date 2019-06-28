@@ -357,7 +357,7 @@ class ContentManager implements ContentManagerInterface
 
     /**
      * Get the public link for the given content
-     * @param object $object un contenu du manager
+     * @param object $object a content from the manager
      * @param array $parameters
      * @param int $referenceType
      * @return string
@@ -365,7 +365,7 @@ class ContentManager implements ContentManagerInterface
     public function getPublicReadLink($object, $parameters = array(), $referenceType = null) {
 
         if($this->contextManager){
-            // si les contexts sont activés, que le contenu est contextualisable et qu'aucun context n'est demandé
+            // If the contexts are active and the content is contextisable and that no specific context is requested
             if($object instanceof ContextualizableInterface && !isset($parameters['_context'])){
                 $parameters['_context'] = $this->getBestContentContext($object);
             }elseif($object instanceof Term){
@@ -512,9 +512,9 @@ class ContentManager implements ContentManagerInterface
             $baseQuery->andWhere('c.published_until IS NULL OR c.published_until > :date_until')
                     ->setParameter('date_until', new \DateTime('now'));
         }
-        // Tant que ce n'est pas spécifié explicitement, on applique les contexts
+        // As long as it's not defined whe apply contexts
         if(false !== $apply_context && $reflection->implementsInterface('Kalamu\CmsCoreBundle\ContentType\Interfaces\ContextualizableInterface')){
-            // Si le context n'est pas spécifié et que le contenu a des contexts configurés on prend celui par défaut
+            // If the context is not applied and that the content has context, whe take the default one
             if(!$context && count($this->contextConfiguration)){
                 $context = $this->contextManager->getDefaultContext();
             }
@@ -543,13 +543,13 @@ class ContentManager implements ContentManagerInterface
 
         $context = $context ? $context : ($current_context ? $current_context : $default_context);
 
-        // Si on a un context spécifié, que ce n'est pas le défaut ou alors que le défaut n'est pas inclusif
+        // If there is a specified context and : it's not the default one OR the default one is not inclusive
         if($context && ($context != $default_context || !$default_inclusive)){
             $baseQuery->leftJoin('c.context_publication', 'context')
                     ->andWhere('context.name = :context')
                     ->setParameter('context', $context);
         }elseif(!$context && !$default_inclusive){
-            // On sélectionne ceux qui n'ont pas de context
+            // We take thoses without context
             $baseQuery
                     ->leftJoin('c.context_publication', 'context')
                     ->andWhere('context.id IS NULL');

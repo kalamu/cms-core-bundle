@@ -150,7 +150,7 @@ interface ContentManagerInterface
 
     /**
      * Get the public link for the given content
-     * @param object $object un contenu du manager
+     * @param object $object a content from the manager
      * @param array $parameters
      * @param int $referenceType
      * @return string

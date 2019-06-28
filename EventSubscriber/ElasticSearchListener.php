@@ -78,13 +78,13 @@ class ElasticSearchListener implements EventSubscriberInterface
             }
         }
 
-        if($accessor->isReadable($object, 'contenu')){
+        if($accessor->isReadable($object, 'content')){
             if(!$this->request_stack->getMasterRequest()){
                 $this->request_stack->push(Request::create('/'));
             }
 
             $content = $this->templating->render('KalamuCmsCoreBundle:Content:_content.html.twig', array('entity' => $object));
-            $document->set('contenu', strip_tags($content));
+            $document->set('content', strip_tags($content));
         }
 
         if($accessor->isReadable($object, 'publish_status')){

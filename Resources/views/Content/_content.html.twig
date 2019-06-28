@@ -1,4 +1,4 @@
-{% set datas = entity.contenu|json_decode %}
+{% set datas = entity.content|json_decode %}
 {% if datas %}
 
     {% for row in datas.rows %}
@@ -15,5 +15,5 @@
 
 
 {% else %}
-    {{content.contenu|nl2br}}
+    {{content.content|nl2br}}
 {% endif %}
