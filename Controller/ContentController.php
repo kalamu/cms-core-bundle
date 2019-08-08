@@ -53,71 +53,12 @@ class ContentController extends Controller
 
     }
 
-    public function readAction(Request $Request, $type, $identifier, $context = null){
-        $manager = $this->get('kalamu_cms_core.content_type.manager')->getType($type);
-        $content = $manager->getPublicContent($identifier, $context);
-        if(!$content){
-            if($Request->attributes->getBoolean('is_home', false)){
-
-                // For the home page it's allowed to not specify the context
-                $baseQuery = $manager->getBasePublicQuery($context, false);
-                $content = $baseQuery->andWhere('c.'.$manager->getIdentifier().' = :identifier')
-                        ->setParameter(':identifier', $identifier)
-                        ->getQuery()
-                        ->getOneOrNullResult();
-
-            }
-
-            if(!$content){
-                throw $this->createNotFoundException();
-            }
+    public function readAction(Request $Request, $type, $identifier, $context = null)
+    {
+        if(is_callable([$this, 'read'.ucwords($type)])){
+            return $this->{'read'.ucwords($type)}($Request, $type, $identifier, $context);
         }
-
-        try{
-            return $this->render($manager->getTemplateFor($content, $context), array('content' => $content, 'manager' => $manager));
-        }catch(\Twig_Error_Runtime $e){
-            if($e->getPrevious() instanceof RedirectException){
-                return $this->redirectToRoute($e->getPrevious()->getRoute(), $e->getPrevious()->getParameters());
-            }elseif($e->getPrevious() instanceof RedirectCmsLinkException){
-                $exception = $e->getPrevious();
-                $url = $this->get('kalamu_cms_core.link_manager')->generateUrl($exception->getCmsLink(), $exception->getParameters(), $exception->getReferenceType());
-                return $this->redirect($url);
-            }else{
-                throw $e;
-            }
-        }
-    }
-
-    public function readTermAction(Request $Request, $identifier){
-        $master_manager = $this->get('kalamu_cms_core.content_type.manager');
-        $manager = $master_manager->getType('term');
-        $term = $manager->getPublicContent($identifier);
-        $page = $Request->query->getInt('page', 1);
-        if(!$term){
-            throw $this->createNotFoundException();
-        }
-
-        $content_type = $term->getTaxonomy()->getApplyOn();
-        if(count($content_type)>1){
-            throw $this->createNotFoundException("Unable to guess the content type");
-        }
-
-        $manager_content = $master_manager->getType(current($content_type));
-        $queryBuilder = $manager_content->getQueryBuilderForIndex($Request);
-        $queryBuilder->leftJoin('c.terms', 'term')
-                ->andWhere('term.id = :id_term')
-                ->setParameter('id_term', $term->getId());
-        $paginator = $this->get('knp_paginator')->paginate($queryBuilder, $page, $manager_content->maxPerPage());
-        if($page>1 && $page>$paginator->getPageCount()){
-            throw $this->createNotFoundException("There is not that much page.");
-        }
-
-        return $this->render($manager->getTemplateFor($term), array(
-            'term' => $term,
-            'paginator' => $paginator,
-            'master_manager' => $master_manager,
-            'manager_term' => $manager,
-            'manager_content' => $manager_content));
+        return $this->read($Request, $type, $identifier, $context);
     }
 
     public function indexAction(Request $Request, $type, $context = null){
@@ -200,5 +141,93 @@ class ContentController extends Controller
             'paginator'     => $paginator,
             'q'             => $Request->query->get('q')
         ));
+    }
+
+    /**
+     * Display the single page of a content
+     *
+     * @param Request $Request
+     * @param $type
+     * @param $identifier
+     * @param null $context
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Twig_Error_Runtime
+     */
+    protected function read(Request $Request, $type, $identifier, $context = null)
+    {
+        $manager = $this->get('kalamu_cms_core.content_type.manager')->getType($type);
+        $content = $manager->getPublicContent($identifier, $context);
+        if(!$content){
+            if($Request->attributes->getBoolean('is_home', false)){
+
+                // For the home page it's allowed to not specify the context
+                $baseQuery = $manager->getBasePublicQuery($context, false);
+                $content = $baseQuery->andWhere('c.'.$manager->getIdentifier().' = :identifier')
+                    ->setParameter(':identifier', $identifier)
+                    ->getQuery()
+                    ->getOneOrNullResult();
+
+            }
+
+            if(!$content){
+                throw $this->createNotFoundException();
+            }
+        }
+
+        try{
+            return $this->render($manager->getTemplateFor($content, $context), array('content' => $content, 'manager' => $manager));
+        }catch(\Twig_Error_Runtime $e){
+            if($e->getPrevious() instanceof RedirectException){
+                return $this->redirectToRoute($e->getPrevious()->getRoute(), $e->getPrevious()->getParameters());
+            }elseif($e->getPrevious() instanceof RedirectCmsLinkException){
+                $exception = $e->getPrevious();
+                $url = $this->get('kalamu_cms_core.link_manager')->generateUrl($exception->getCmsLink(), $exception->getParameters(), $exception->getReferenceType());
+                return $this->redirect($url);
+            }else{
+                throw $e;
+            }
+        }
+    }
+
+    /**
+     * Display the list of contents classified in the requested term
+     *
+     * @param Request $Request
+     * @param $type
+     * @param $identifier
+     * @param $context
+     * @return Response
+     */
+    protected function readTerm(Request $Request, $type, $identifier, $context){
+        $master_manager = $this->get('kalamu_cms_core.content_type.manager');
+        $manager = $master_manager->getType('term');
+        $term = $manager->getPublicContent($identifier);
+        $page = $Request->query->getInt('page', 1);
+        if(!$term){
+            throw $this->createNotFoundException();
+        }
+
+        $content_type = $term->getTaxonomy()->getContentType();
+        if(!$content_type){
+            throw $this->createNotFoundException("This taxonomy is not associated to a content type");
+        }
+
+        $manager_content = $master_manager->getManagerForClass($content_type);
+        $queryBuilder = $manager_content->getQueryBuilderForIndex($Request);
+        $queryBuilder->leftJoin('c.terms', 'term')
+            ->andWhere('term.id = :id_term')
+            ->setParameter('id_term', $term->getId());
+        $paginator = $this->get('knp_paginator')->paginate($queryBuilder, $page, $manager_content->maxPerPage());
+        if($page>1 && $page>$paginator->getPageCount()){
+            throw $this->createNotFoundException("There is not that much page.");
+        }
+
+        return $this->render($manager->getTemplateFor($term), array(
+            'term' => $term,
+            'paginator' => $paginator,
+            'master_manager' => $master_manager,
+            'manager_term' => $manager,
+            'manager_content' => $manager_content));
     }
 }
