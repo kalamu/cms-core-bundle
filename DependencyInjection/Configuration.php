@@ -140,69 +140,8 @@ class Configuration implements ConfigurationInterface
                                 ->scalarNode('template')
                                     ->info("Default template for individual (template name or path)")
                                 ->end()
-                                ->arrayNode('templates')
-                                    ->fixXmlConfig('name')
-                                    ->prototype('array')
-                                        ->children()
-                                            ->scalarNode('title')
-                                                ->isRequired()
-                                                ->info("Display name of the template")
-                                            ->end()
-                                            ->scalarNode('template')
-                                                ->info("Path to the template")
-                                                ->isRequired()
-                                            ->end()
-                                        ->end()
-                                    ->end()
-                                    ->info("List of templates if the entity implements TemplateableInterface")
-                                ->end()
-                                ->arrayNode('contexts')
-                                    ->fixXmlConfig('name')
-                                    ->prototype('array')
-                                        ->children()
-                                            ->booleanNode('has_index')
-                                                ->info("Define if the type has an index page")
-                                            ->end()
-                                            ->booleanNode('has_rss')
-                                                ->info("Define if the type has an RSS flux")
-                                            ->end()
-                                            ->integerNode('max_per_page')
-                                                ->info("Number of item per page")
-                                            ->end()
-                                            ->scalarNode('template_index')
-                                                ->info("Template path for index")
-                                            ->end()
-                                            ->scalarNode('controller_index')
-                                                ->info("Controller for index page")
-                                            ->end()
-                                            ->scalarNode('controller_read')
-                                                ->info("Controller for individual page")
-                                            ->end()
-                                            ->scalarNode('controller_rss')
-                                                ->info("Controller for RSS flux")
-                                            ->end()
-                                            ->scalarNode('template')
-                                                ->info("Default template for individual (template name or path")
-                                            ->end()
-                                            ->arrayNode('templates')
-                                                ->fixXmlConfig('name')
-                                                ->prototype('array')
-                                                    ->children()
-                                                        ->scalarNode('title')
-                                                            ->isRequired()
-                                                            ->info("Display name of the template")
-                                                        ->end()
-                                                        ->scalarNode('template')
-                                                            ->info("Path to the template")
-                                                            ->isRequired()
-                                                        ->end()
-                                                    ->end()
-                                                ->end()
-                                                ->info("List of templates if the entity implements TemplateableInterface")
-                                            ->end()
-                                        ->end()
-                                    ->end()
-                                ->end()
+                                ->append($this->addTemplateListNode())
+                                ->append($this->addContextNode())
                             ->end()
                         ->end()
                     ->end()
@@ -273,5 +212,79 @@ class Configuration implements ConfigurationInterface
                 ;
 
         return $treeBuilder;
+    }
+
+    /**
+     * Context configuration for a content type
+     * @return \Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition|\Symfony\Component\Config\Definition\Builder\NodeDefinition
+     */
+    public function addContextNode()
+    {
+        $treeBuilder = new TreeBuilder();
+        $node = $treeBuilder->root('contexts');
+
+
+        $node
+            ->fixXmlConfig('name')
+            ->prototype('array')
+                ->children()
+                    ->booleanNode('has_index')
+                        ->info("Define if the type has an index page")
+                    ->end()
+                    ->booleanNode('has_rss')
+                        ->info("Define if the type has an RSS flux")
+                    ->end()
+                    ->integerNode('max_per_page')
+                        ->info("Number of item per page")
+                    ->end()
+                    ->scalarNode('template_index')
+                        ->info("Template path for index")
+                    ->end()
+                    ->scalarNode('controller_index')
+                        ->info("Controller for index page")
+                    ->end()
+                    ->scalarNode('controller_read')
+                        ->info("Controller for individual page")
+                    ->end()
+                    ->scalarNode('controller_rss')
+                        ->info("Controller for RSS flux")
+                    ->end()
+                    ->scalarNode('template')
+                        ->info("Default template for individual (template name or path")
+                    ->end()
+                    ->append($this->addTemplateListNode())
+                ->end()
+            ->end();
+
+        return $node;
+    }
+
+    /**
+     * Configuration for a list of available template
+     * @return \Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition|\Symfony\Component\Config\Definition\Builder\NodeDefinition
+     */
+    public function addTemplateListNode()
+    {
+        $treeBuilder = new TreeBuilder();
+        $node = $treeBuilder->root('templates');
+
+        $node
+            ->fixXmlConfig('name')
+                ->prototype('array')
+                    ->children()
+                        ->scalarNode('title')
+                            ->isRequired()
+                            ->info("Display name of the template")
+                        ->end()
+                        ->scalarNode('template')
+                            ->info("Path to the template")
+                            ->isRequired()
+                        ->end()
+                    ->end()
+                ->end()
+            ->info("List of templates if the entity implements TemplateableInterface")
+        ;
+
+        return $node;
     }
 }
