@@ -69,12 +69,9 @@ class Configuration implements ConfigurationInterface
                     ->end()
 
                     ->arrayNode('types')
+                        ->useAttributeAsKey('name')
                         ->prototype('array')
                             ->children()
-                                ->scalarNode('name')
-                                    ->isRequired()
-                                    ->info("Name of the type")
-                                ->end()
                                 ->scalarNode('label')
                                     ->info("Display name")
                                 ->end()
@@ -163,7 +160,7 @@ class Configuration implements ConfigurationInterface
 
                         foreach($config['types'] as $i => $type){
                             if(!isset($type['label']) || !$type['label']){
-                                $config['types'][$i]['label'] = $type['name'];
+                                $config['types'][$i]['label'] = $i;
                             }
                         }
 
@@ -176,6 +173,7 @@ class Configuration implements ConfigurationInterface
                         ->then(function($config){
                             // Default template for search if not defined by type
                             foreach($config['types'] as $i => $type){
+                                $config['types'][$i]['name'] = $i;
                                 if(!isset($type['template_search'])){
                                     $config['types'][$i]['template_search'] = $config['template_search'];
                                 }
